@@ -1,9 +1,15 @@
+// Comment needed here on the purpose of this file
+
+// isn't this redundant? you're requiring the same file that you're editing?
 var CardCheck = require('./CardCheck.js');
+
+var DEBUG = false; // should be a const but that's not supported in all browsers
 
 var cards = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 var suit = ['S', 'H', 'D', 'C'];
 var fullDeck = [];
 var shoeDeck = [];
+// in general I don't recommend single character variables
 var i, j, k, l, m, n;
 
 var player1Hand = [];
@@ -20,6 +26,8 @@ var decksInShoeCheck = 1;
 var decksInShoe = 6;
 
 //players/dealer card numerical value
+// how are you dealing with Aces being either 1 or 11?
+// could xCardTotal be an array or one or two Integers?
 var playerCardTotal = 0;
 var dealerCardTotal = 0;
 
@@ -47,15 +55,28 @@ Deck();
 //creates a deck of cards
 function Deck()
 {
+  if (DEBUG) {console.log('deck()');};
 
-	for(var i = 0; i < suit.length; i++)
-	{		
-		for(var j = 0; j < cards.length; j++)
-		{
-			fullDeck.push(cards[j] + suit[i]);
-		}	
-	}
+  // you're relying on globals instead of parameters, why?
+  // e.g. you have suit and cards defined globally. do you need them outside this function?
 
+// 	for(var i = 0; i < suit.length; i++)
+// 	{
+// 		for(var j = 0; j < cards.length; j++)
+// 		{
+// 			fullDeck.push(cards[j] + suit[i]);
+// 		}
+// 	}
+
+  // why is this code block better than the one I commented out above?
+  suit.forEach(function(suitLetter) {
+    cards.forEach(function(cardLetter) {
+      fullDeck.push(cardLetter + suitLetter);
+    })
+  });
+
+  // I don't think you should call this from within Deck.
+  // consider calling it right after 'Deck();' above
 	Shoe();
 
 	newDeckLength = shoeDeck.length;
@@ -63,18 +84,30 @@ function Deck()
 }
 
 //adds multiple decks to the shoe
+// consider renaming this to be more descriptive "addDeckToShoe"
+// also function names should be camelCase (not required, but by convention)
 function Shoe()
 {
-	while(decksInShoeCheck <= decksInShoe)
-	{
-		for(var k = 0; k < fullDeck.length; k++)
-		{
-			shoeDeck.push(fullDeck[k]);
-		}
+  if (DEBUG) {console.log('shoe()');};
+  // it wasn't immediately clear to me that you were just iterating through the loop
+  // six times here. Perhaps these should be local variables instead of global?
+// 	while(decksInShoeCheck <= decksInShoe)
+// 	{
+// 		for(var k = 0; k < fullDeck.length; k++)
+// 		{
+// 			shoeDeck.push(fullDeck[k]);
+// 		}
 
-		decksInShoeCheck++;
+// 		decksInShoeCheck++;
 
-	}
+// 	}
+
+  // try this instead
+  // note: concat method of an array is easier to read and likely faster than your own for loop
+  // copies the elements of the 'fullDeck' array into the shoeDeck array six times (to fill the shoe)
+  for (deck = 0; deck < decksInShoe; deck++) {
+    shoeDeck = shoeDeck.concat(fullDeck);
+  }
 
 	decksInShoeCheck = 0;
 	//outputs for cards in entire shoe
@@ -84,22 +117,41 @@ function Shoe()
 //console.log(newDeckLength);
 //console.log(shoeDeck.length);
 
+// you're mixing runtime code with function and variable definitions here
+// I recommend pulling all the runtime code down below the function definitions to make
+// flow control easier to understand and debug.
+// Deck();
+// Shoe();
+// InitialDeal();
+
 InitialDeal();
 
 //deals the first hand for player and dealer from the shoe
 function InitialDeal()
 {
+  if (DEBUG) {console.log('InitialDeal()');};
 	ShoeCheck();
 
-	while(shoeDeck.length > (newDeckLength - 4))
+	while(shoeDeck.length > (newDeckLength - 4)) // '4' is a magic number. where did it come from? What does it represent? change to a variable or CONSTANT
 	{
 		ShoeCheck();
 		//picks a card at random from the deck
-		randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
+    // I recommend generating the random number first, then using it as the index into shoeDeck twice instead of using 'shoeDeck.indexOf(randCard)' which is an expensive operation. (Why?)
+		//randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
 		//removes the card from the deck
-		shoeDeck.splice(shoeDeck.indexOf(randCard),1);
+		//shoeDeck.splice(shoeDeck.indexOf(randCard),1);
+    // here's the above re-written:
 
-		if(dealPlayer == true)
+    // pick a random index into the deck
+    randCardNumber = Math.floor(Math.random() * shoeDeck.length);
+    // store the value of that card
+    var randCard = shoeDeck[randCardNumber];
+    // remove the one random card from the shoe
+    shoeDeck.splice(randCardNumber,1);
+
+		//if(dealPlayer == true)
+      // stylistically re-written as:
+      if(dealPlayer)
 		{
 			//adds the random card to the players hand
 			player1Hand.push(randCard);
@@ -107,13 +159,16 @@ function InitialDeal()
 			dealPlayer = false;
 		}
 
-		else if (dealPlayer == false)
+		//else if (dealPlayer == false)
+      // stylistically re-written as:
+      else if (!dealPlayer)
 		{
 			//adds the random card to the dealers hand
 			dealerHand.push(randCard);
 			//else it is the players turn
-			dealPlayer = true
+			dealPlayer = true;
 		}
+    // actually since there is no 'else' clause, you don't even need to use 'else if' above
 	}
 
 	newDeckLength = shoeDeck.length;
@@ -125,6 +180,7 @@ function InitialDeal()
 
 function PrintInitialDeal()
 {
+  if (DEBUG) {console.log('PrintInitialDeal()');};
 	console.log("Player's Hand: ")
 	console.log(player1Hand);
 	console.log("Dealer's Hand: ")
@@ -136,6 +192,7 @@ function PrintInitialDeal()
 //turns cards into a numerical value and adds them together
 function PlayerCardCheck(currentCards)
 {
+  if (DEBUG) {console.log('PlayerCardCheck()');};
 	playerCardTotal = 0;
 
 	for(var l = 0; l < currentCards.length; l++)
@@ -222,6 +279,7 @@ function PlayerCardCheck(currentCards)
 
 function NumberCheck()
 {
+  if (DEBUG) {console.log('NumberCheck()');};
 	//STAY
 	if(playerCardTotal >= 17 && playerCardTotal < 21)
 	{
@@ -232,7 +290,7 @@ function NumberCheck()
 	//BLACKJACK
 	else if(playerCardTotal == 21)
 	{
-		DealerCardCheck(dealerHand);	
+		DealerCardCheck(dealerHand);
 	}
 
 	//HIT
@@ -251,6 +309,7 @@ function NumberCheck()
 
 function HitAgain()
 {
+  if (DEBUG) {console.log('HitAgain()');};
 	ShoeCheck();
 
 	randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
@@ -270,6 +329,7 @@ function LogicCheck()
 
 function DealerCardCheck(dealerCards)
 {
+  if (DEBUG) {console.log('DealerCardCheck()');};
 	dealerCardTotal = 0;
 
 	for(var m = 0; m < dealerCards.length; m++)
@@ -284,7 +344,7 @@ function DealerCardCheck(dealerCards)
 			else
 			{
 				dealerCardTotal += 1;
-			}		
+			}
 		}
 
 		if(dealerCards[m].charAt(0) == '2')
@@ -355,6 +415,7 @@ function DealerCardCheck(dealerCards)
 
 function DealerNumberCheck()
 {
+  if (DEBUG) {console.log('DealerNumberCheck()');};
 	//STAY
 	if(dealerCardTotal >= 17 && dealerCardTotal < 21)
 	{
@@ -383,6 +444,7 @@ function DealerNumberCheck()
 
 function DealerHitAgain()
 {
+  if (DEBUG) {console.log('DealerHitAgain()');};
 	ShoeCheck();
 
 	randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
@@ -397,6 +459,7 @@ function DealerHitAgain()
 
 function WinOrLose()
 {
+  if (DEBUG) {console.log('WinOrLose()');};
 	newDeckLength = shoeDeck.length;
 
 	if(playerBust == true)
@@ -447,11 +510,11 @@ function WinOrLose()
 	dealerHand = [];
 	playerCardTotal = 0;
 	dealerCardTotal = 0;
-	decksInShoeCheck = 1;	
+	decksInShoeCheck = 1;
 	playerBust = false;
 
 	if(dealCounter < amountOfDeals)
-	{	
+	{
 		InitialDeal();
 	}
 
@@ -462,8 +525,10 @@ function WinOrLose()
 	}
 }
 
+// comments needed
 function ShoeCheck()
 {
+  if (DEBUG) {console.log('ShoeCheck()');};
 	if(shoeDeck.length == 0)
 	{
 		fullDeck = [];
@@ -475,3 +540,5 @@ function ShoeCheck()
 		return;
 }
 
+// this stops the node process and returns to the Terminal
+process.exit(code=0);
