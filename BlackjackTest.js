@@ -8,8 +8,13 @@ var i, j, k, l, m, n;
 
 var player1Hand = [];
 var dealerHand = [];
+var player2Hand = [];
+var player3Hand = [];
 
-var dealPlayer = true;
+var dealPlayer1 = true;
+var dealDealer = false;
+var dealPlayer2 = false;
+//var dealPlayer3 = false;
 
 var newDeckLength;
 
@@ -20,12 +25,14 @@ var decksInShoeCheck = 1;
 var decksInShoe = 6;
 
 //players/dealer card numerical value
-var playerCardTotal = 0;
+var player1CardTotal = 0;
+var player2CardTotal = 0;
 var dealerCardTotal = 0;
 
 //var aceAmount = 1;
 
-var playerBust = false;
+var player1Bust = false;
+var player2Bust = false;
 var dealerBust = false;
 var firstDeal = true;
 var playerAce = false;
@@ -35,7 +42,29 @@ var dealCounter = 0;
 //used to change the amount of deals before the program stops
 var amountOfDeals = 1;
 
-var amountOfAces = 0;
+var numberOfAces = 0;
+
+var player1TotalWins = 0;
+var player1TotalLosses = 0;
+var player1TotalPushes = 0;
+var player2TotalWins = 0;
+var player2TotalLosses = 0;
+var player2TotalPushes = 0;
+
+//used to change amount of players to be dealt
+var amountOfPlayers = 0;
+
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+var util = require('util');
+
+console.log('How many people are playing?');
+
+process.stdin.on('data', function (playersNumb) 
+{
+	console.log('received data:', util.inspect(playersNumb));
+});
+
 
 
 Deck();
@@ -73,21 +102,22 @@ function Shoe()
 	}
 
 	decksInShoeCheck = 0;
+
 	//outputs for cards in entire shoe
 	//console.log(shoeDeck);
 }
 
-console.log(newDeckLength);
-console.log(shoeDeck.length);
+//console.log(newDeckLength);
+//console.log(shoeDeck.length);
 
 InitialDeal();
 
-//deals the first hand for player and dealer from the shoe
+//deals the first hand for player(s) and dealer from the shoe
 function InitialDeal()
 {
 	ShoeCheck();
 
-	while(shoeDeck.length > (newDeckLength - 4))
+	while(shoeDeck.length > (newDeckLength - ((amountOfPlayers + 1) * 2)))
 	{
 		ShoeCheck();
 		//picks a card at random from the deck
@@ -95,22 +125,41 @@ function InitialDeal()
 		//removes the card from the deck
 		shoeDeck.splice(shoeDeck.indexOf(randCard),1);
 
-		if(dealPlayer == true)
+		if(dealPlayer1 == true)
 		{
 			//adds the random card to the players hand
 			player1Hand.push(randCard);
 			//else it is the dealers turn
-			dealPlayer = false;
+			dealPlayer1 = false;
+
+			if(amountOfPlayers == 1)
+			{
+				dealDealer = true;
+			}
+
+			else if(amountOfPlayers == 2)
+			{
+				dealPlayer2 = true;
+			}
 		}
 
-		else if (dealPlayer == false)
+		else if(dealPlayer2 == true)
+		{
+			player2Hand.push(randCard);
+			dealDealer = true;
+			dealPlayer2 = false;
+		}
+
+		else if (dealDealer == true)
 		{
 			//adds the random card to the dealers hand
 			dealerHand.push(randCard);
 			//else it is the players turn
-			dealPlayer = true
+			dealPlayer1 = true
+			dealDealer = false;
 		}
 	}
+
 
 	newDeckLength = shoeDeck.length;
 	//prints card that was
@@ -121,191 +170,277 @@ function InitialDeal()
 
 function PrintInitialDeal()
 {
-	console.log("Player's Hand: ")
+	console.log("Player 1 Hand: ")
 	console.log(player1Hand);
+
+	if(amountOfPlayers == 2)
+	{
+		console.log("Player 2 Hand: ");
+		console.log(player2Hand);
+	}	
+
 	console.log("Dealer's Hand: ")
 	console.log(dealerHand);
+	console.log("");
 
-	PlayerCardCheck(player1Hand);
+	Player1CardCheck(player1Hand);
 }
 
 //turns cards into a numerical value and adds them together
-function PlayerCardCheck(currentCards)
+function Player1CardCheck(currentCards)
 {
-	playerCardTotal = 0;
+	player1CardTotal = 0;
 
 	for(var l = 0; l < currentCards.length; l++)
 	{
 		if(currentCards[l].charAt(0) == 'A')
 		{
-			//if(currentCards.length >= 3)
-			//{
-				playerCardTotal = playerCardTotal + 11;
-			//}
+			if(player1CardTotal < 11)
+				player1CardTotal += 11;
 
-			//else if(currentCards.length == 2)
-			//{
-			//	playerCardTotal = playerCardTotal + 1;
-			//}
-
-			playerAce = true;
+			else
+				player1CardTotal += 1;
 		}
 
 		if(currentCards[l].charAt(0) == '2')
 		{
-			playerCardTotal = playerCardTotal + 2;
+			player1CardTotal = player1CardTotal + 2;
 		}
 
 		if(currentCards[l].charAt(0) == '3')
 		{
-			playerCardTotal = playerCardTotal + 3;
+			player1CardTotal = player1CardTotal + 3;
 		}
 
 		if(currentCards[l].charAt(0) == '4')
 		{
-			playerCardTotal = playerCardTotal + 4;
+			player1CardTotal = player1CardTotal + 4;
 		}
 
 		if(currentCards[l].charAt(0) == '5')
 		{
-			playerCardTotal = playerCardTotal + 5;
+			player1CardTotal = player1CardTotal + 5;
 		}
 
 		if(currentCards[l].charAt(0) == '6')
 		{
-			playerCardTotal = playerCardTotal + 6;
+			player1CardTotal = player1CardTotal + 6;
 		}
 
 		if(currentCards[l].charAt(0) == '7')
 		{
-			playerCardTotal = playerCardTotal + 7;
+			player1CardTotal = player1CardTotal + 7;
 		}
 
 		if(currentCards[l].charAt(0) == '8')
 		{
-			playerCardTotal = playerCardTotal + 8;
+			player1CardTotal = player1CardTotal + 8;
 		}
 
 		if(currentCards[l].charAt(0) == '9')
 		{
-			playerCardTotal = playerCardTotal + 9;
+			player1CardTotal = player1CardTotal + 9;
 		}
 
 		if(currentCards[l].charAt(0) == '1')
 		{
-			playerCardTotal = playerCardTotal + 10;
+			player1CardTotal = player1CardTotal + 10;
 		}
 
 		if(currentCards[l].charAt(0) == 'J')
 		{
-			playerCardTotal = playerCardTotal + 10;
+			player1CardTotal = player1CardTotal + 10;
 		}
 
 		if(currentCards[l].charAt(0) == 'Q')
 		{
-			playerCardTotal = playerCardTotal + 10;
+			player1CardTotal = player1CardTotal + 10;
 		}
 
 		if(currentCards[l].charAt(0) == 'K')
 		{
-			playerCardTotal = playerCardTotal + 10;
+			player1CardTotal = player1CardTotal + 10;
 		}
 	}
 
-	console.log(playerCardTotal);
+	console.log("Player 1 Card Total:")
+	console.log(player1CardTotal);
+	console.log("");
 	NumberCheck();
+}
+
+function Player2CardCheck(currentCards)
+{
+	player2CardTotal = 0;
+
+	for(var l = 0; l < currentCards.length; l++)
+	{
+		if(currentCards[l].charAt(0) == 'A')
+		{
+			if(player2CardTotal < 11)
+			{
+				player2CardTotal += 11;
+			}
+
+			else
+			{
+				player2CardTotal += 1;
+			}
+		}
+
+		if(currentCards[l].charAt(0) == '2')
+		{
+			player2CardTotal = player2CardTotal + 2;
+		}
+
+		if(currentCards[l].charAt(0) == '3')
+		{
+			player2CardTotal = player2CardTotal + 3;
+		}
+
+		if(currentCards[l].charAt(0) == '4')
+		{
+			player2CardTotal = player2CardTotal + 4;
+		}
+
+		if(currentCards[l].charAt(0) == '5')
+		{
+			player2CardTotal = player2CardTotal + 5;
+		}
+
+		if(currentCards[l].charAt(0) == '6')
+		{
+			player2CardTotal = player2CardTotal + 6;
+		}
+
+		if(currentCards[l].charAt(0) == '7')
+		{
+			player2CardTotal = player2CardTotal + 7;
+		}
+
+		if(currentCards[l].charAt(0) == '8')
+		{
+			player2CardTotal = player2CardTotal + 8;
+		}
+
+		if(currentCards[l].charAt(0) == '9')
+		{
+			player2CardTotal = player2CardTotal + 9;
+		}
+
+		if(currentCards[l].charAt(0) == '1')
+		{
+			player2CardTotal = player2CardTotal + 10;
+		}
+
+		if(currentCards[l].charAt(0) == 'J')
+		{
+			player2CardTotal = player2CardTotal + 10;
+		}
+
+		if(currentCards[l].charAt(0) == 'Q')
+		{
+			player2CardTotal = player2CardTotal + 10;
+		}
+
+		if(currentCards[l].charAt(0) == 'K')
+		{
+			player2CardTotal = player2CardTotal + 10;
+		}
+	}
+
+	console.log("Player 2 Card Total:")
+	console.log(player2CardTotal);
+	console.log("");
+	Player2NumberCheck();
 }
 
 function NumberCheck()
 {
-	//DID NOT BUST
-	if(playerCardTotal < 21)
+	//PLAYER 1 STAY
+	if(player1CardTotal >= 17 && player1CardTotal < 21)
 	{
-		//LogicCheck();
+		if(amountOfPlayers == 2)
+			Player2CardCheck(player2Hand);
 
-		//STAY
-		if(playerCardTotal >= 17)
-		{
+		else if(amountOfPlayers == 1)
 			DealerCardCheck(dealerHand);
-		}
-
-		//HIT
-		else if(playerCardTotal <= 16)
-		{
-			for(var n = 0; n < player1Hand.length; n++)
-			{
-				if(player1Hand[n].charAt(0) == 'A')
-				{
-					amountOfAces ++;
-				}
-			}
-
-			if(amountOfAces >= 1)
-			{
-				//amountOfAces = 11 + (player1Hand.length - amountOfAces);
-				playerCardTotal = playerCardTotal - 10;
-				amountOfAces = 0;
-				HitAgain();
-			}
-
-			if(amountOfAces == 0)
-			{
-				HitAgain();
-			}
-		}
 	}
 
-	//BLACKJACK
-	else if(playerCardTotal == 21)
+	//PLAYER 1 BLACKJACK
+	else if(player1CardTotal == 21)
 	{
-		DealerCardCheck(dealerHand);
+		if(amountOfPlayers == 2)
+			Player2CardCheck(player2Hand);
+
+		else if(amountOfPlayers == 1)
+			DealerCardCheck(dealerHand);
 	}
 
-	//BUST
-	else if(playerCardTotal >= 22)
+	//PLAYER 1 HIT
+	else if (player1CardTotal <= 16)
 	{
-		for(var n = 0; n < player1Hand.length; n++)
-		{
-			if(player1Hand[n].charAt(0) == 'A')
-			{
-				amountOfAces ++;
-			}
-		}
+		HitPlayer1Again();
+	}
 
-		if(amountOfAces >= 1)
-		{
-			amountOfAces = 11 + (player1Hand.length - amountOfAces);
-			playerCardTotal = playerCardTotal - 10;
-			amountOfAces = 0;
-			NumberCheck();
-		}
+	//PLAYER 1 BUST
+	else if(player1CardTotal >= 22)
+	{
+		player1Bust = true;
 
-		playerBust = true;
-		WinOrLose();
+		if(amountOfPlayers == 2)
+			Player2CardCheck(player2Hand);
+
+		else if(amountOfPlayers == 1)
+			DealerCardCheck(dealerHand);
 	}
 }
 
-function HitAgain()
+function Player2NumberCheck()
+{
+	if(player2CardTotal >= 17 && player2CardTotal < 21)
+		DealerCardCheck(dealerHand);
+
+	else if(player2CardTotal == 21)
+		DealerCardCheck(dealerHand);
+
+	else if(player2CardTotal <= 16)
+		HitPlayer2Again();
+
+	else if(player2CardTotal >= 22)
+	{
+		player2Bust = true;
+		DealerCardCheck(dealerHand);
+	}
+		
+}
+
+function HitPlayer1Again()
 {
 	ShoeCheck();
-
-	for(var n = 0; n < player1Hand.length; n++)
-	{
-		if(player1Hand[n].charAt(0) == 'A')
-		{
-			playerCardTotal = playerCardTotal - 10;
-			//NumberCheck();
-		}
-	}
 
 	randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
 	shoeDeck.splice(shoeDeck.indexOf(randCard),1);
 	player1Hand.push(randCard);
 
-	console.log("Player's Hand: ")
+	console.log("Player 1 Hand: ")
 	console.log(player1Hand);
 
-	PlayerCardCheck(player1Hand);
+	Player1CardCheck(player1Hand);
+}
+
+function HitPlayer2Again()
+{
+	ShoeCheck();
+
+	randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
+	shoeDeck.splice(shoeDeck.indexOf(randCard),1);
+	player2Hand.push(randCard);
+
+	console.log("Player 2 Hand: ")
+	console.log(player2Hand);
+
+	Player1CardCheck(player1Hand);
 }
 
 function LogicCheck()
@@ -321,15 +456,15 @@ function DealerCardCheck(dealerCards)
 	{
 		if(dealerCards[m].charAt(0) == 'A')
 		{
-			//if(currentCards.length >= 3)
-			//{
-				dealerCardTotal = dealerCardTotal + 11;
-			//}
+			if(dealerCardTotal < 11)
+			{
+				dealerCardTotal += 11;
+			}
 
-			//else if(currentCards.length == 2)
-			//{
-			//	playerCardTotal = playerCardTotal + 1;
-			//}
+			else
+			{
+				dealerCardTotal += 1;
+			}		
 		}
 
 		if(dealerCards[m].charAt(0) == '2')
@@ -442,38 +577,65 @@ function DealerHitAgain()
 
 function WinOrLose()
 {
-	//newDeckLength = shoeDeck.length;
+	newDeckLength = shoeDeck.length;
 
-	if(playerBust == true)
+	if(player1Bust == true)
 	{
-		console.log("BUST");
+		//console.log("PLAYER 1 BUST");
+		if(dealerBust == false)
+			player1TotalLosses ++;
 	}
 
-	else if(playerBust == false)
+	else if(player1Bust == false)
 	{
 		if(dealerBust == true)
 		{
-			console.log("YOU WIN");
+			//console.log("YOU WIN");
+			player1TotalWins ++;
 		}
 
-		else if (dealerCardTotal > playerCardTotal)
+		else if (dealerCardTotal > player1CardTotal)
 		{
-			console.log("YOU LOSE");
+			//console.log("YOU LOSE");
+			player1TotalLosses ++;
 		}
 
-		else if (dealerCardTotal < playerCardTotal)
+		else if (dealerCardTotal < player1CardTotal)
 		{
-			console.log("YOU WIN");
+			//console.log("YOU WIN");
+			player1TotalWins ++;
 		}
 
-		else if (dealerCardTotal == playerCardTotal)
+		else if (dealerCardTotal == player1CardTotal)
 		{
-			console.log("PUSH");
+			//console.log("PUSH");
+			player1TotalPushes ++;
+		}
+	}
+
+	if(amountOfPlayers == 2)
+	{
+		if(player2Bust == true)
+		{
+			//console.log("PLAYER 2 BUST");
+			if(dealerBust == false)
+				player2TotalLosses ++;
+
 		}
 
-		else if(playerCardTotal == 21)
+		else if(player2Bust == false)
 		{
-			console.log("YOU WIN");
+			if(dealerBust == true)
+				player2TotalWins ++;
+
+			else if (dealerCardTotal > player2CardTotal)
+				player2TotalLosses ++;
+
+			else if (dealerCardTotal < player2CardTotal)
+				player2TotalWins ++;
+
+			else if (dealerCardTotal == player2CardTotal)
+				player2TotalPushes ++;
 		}
 	}
 
@@ -485,28 +647,28 @@ function WinOrLose()
 	console.log("");
 	console.log("Hands Dealt:");
 	console.log(dealCounter);
-
-	//console.log(shoeDeck.length);
-	//console.log(newDeckLength - 4);
+	console.log("");
 
 	player1Hand = [];
+	player2Hand = [];
 	dealerHand = [];
-	playerCardTotal = 0;
+	player1CardTotal = 0;
+	player2CardTotal = 0;
 	dealerCardTotal = 0;
 	decksInShoeCheck = 1;	
-	playerBust = false;
+	player1Bust = false;
+	player2Bust = false;
+	dealerBust = false;
 
-	//console.log(fullDeck);
-
-	//console.log(shoeDeck);
-
-	if(dealCounter <= amountOfDeals)
+	if(dealCounter < amountOfDeals)
 	{	
 		InitialDeal();
 	}
 
-	else
-		return;
+	else if(dealCounter == amountOfDeals)
+	{
+		FinalOutput();
+	}
 }
 
 function ShoeCheck()
@@ -520,4 +682,14 @@ function ShoeCheck()
 
 	else
 		return;
+}
+
+function FinalOutput()
+{
+	console.log("Player 1 - Wins: " + player1TotalWins + "  Losses: " + player1TotalLosses + "  Pushes: " + player1TotalPushes);
+
+	if(amountOfPlayers == 2)
+	{
+		console.log("Player 2 - Wins: " + player2TotalWins + "  Losses: " + player2TotalLosses + "  Pushes: " + player2TotalPushes);
+	}
 }
