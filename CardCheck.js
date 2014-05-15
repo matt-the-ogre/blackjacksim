@@ -1,48 +1,32 @@
-var CardCheck = require('./CardCheck.js');
+// Simulates games of blackjack. 
 
-var cards = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-var suit = ['S', 'H', 'D', 'C'];
+var DEBUG = true; // should be a const but that's not supported in all browsers
+
 var fullDeck = [];
 var shoeDeck = [];
-var i, j, k, l, m, n;
 
 var player1Hand = [];
 var dealerHand = [];
 var player2Hand = [];
 var player3Hand = [];
 
-var dealPlayer1 = true;
-var dealDealer = false;
-var dealPlayer2 = false;
-//var dealPlayer3 = false;
-
 var newDeckLength;
 
-//do not change
-var decksInShoeCheck = 1;
-
-//used to change the amount of total decks in the shoe
-var decksInShoe = 6;
-
 //players/dealer card numerical value
+// how are you dealing with Aces being either 1 or 11?
+// could xCardTotal be an array or one or two Integers?
 var player1CardTotal = 0;
 var player2CardTotal = 0;
 var dealerCardTotal = 0;
 
-//var aceAmount = 1;
-
 var player1Bust = false;
 var player2Bust = false;
 var dealerBust = false;
-var firstDeal = true;
-var playerAce = false;
 
 var dealCounter = 0;
 
 //used to change the amount of deals before the program stops
-var amountOfDeals = 1;
-
-var numberOfAces = 0;
+var amountOfDeals = 500;
 
 var player1TotalWins = 0;
 var player1TotalLosses = 0;
@@ -55,92 +39,109 @@ var player2TotalPushes = 0;
 var amountOfPlayers = 2;
 
 
-
-
-Deck();
+createDeck();
+initialDeal();
 
 //creates a deck of cards
-function Deck()
+function createDeck()
 {
+  if (DEBUG) {console.log('createDeck()');};
 
-	for(var i = 0; i < suit.length; i++)
-	{		
-		for(var j = 0; j < cards.length; j++)
-		{
-			fullDeck.push(cards[j] + suit[i]);
-		}	
-	}
+	var cards = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+	var suit = ['S', 'H', 'D', 'C'];
 
-	Shoe();
+	suit.forEach(function(suitLetter) 
+				{
+		cards.forEach(function(cardNumber) 
+					{
+    	fullDeck.push(cardNumber + suitLetter);
+					})
 
-	newDeckLength = shoeDeck.length;
-	//console.log(newDeckLength);
+				});
+
+	addDecksToShoe();
+
+
 }
 
 //adds multiple decks to the shoe
-function Shoe()
+function addDecksToShoe()
 {
-	while(decksInShoeCheck <= decksInShoe)
+	//used to change the amount of total decks in the shoe
+	var decksInShoe = 6;
+
+	if (DEBUG) {console.log('addDecksToShoe()');};
+
+	for (deck = 0; deck < decksInShoe; deck++) 
 	{
-		for(var k = 0; k < fullDeck.length; k++)
-		{
-			shoeDeck.push(fullDeck[k]);
-		}
+		shoeDeck = shoeDeck.concat(fullDeck);
+ 	}
 
-		decksInShoeCheck++;
-
-	}
-
-	decksInShoeCheck = 0;
-
-	//outputs for cards in entire shoe
-	//console.log(shoeDeck);
+ 	newDeckLength = shoeDeck.length;
 }
 
-//console.log(newDeckLength);
-//console.log(shoeDeck.length);
+// you're mixing runtime code with function and variable definitions here
+// I recommend pulling all the runtime code down below the function definitions to make
+// flow control easier to understand and debug.
+// createDeck();
+// addDecksToShoe();
+// initialDeal();
 
-InitialDeal();
+//initialDeal();
+
 
 //deals the first hand for player(s) and dealer from the shoe
-function InitialDeal()
+function initialDeal()
 {
-	ShoeCheck();
+  if (DEBUG) {console.log('initialDeal()');};
+	shoeCheck();
 
+	//deals cards until each player (+ the dealer) has two cards each
 	while(shoeDeck.length > (newDeckLength - ((amountOfPlayers + 1) * 2)))
 	{
-		ShoeCheck();
-		//picks a card at random from the deck
-		randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
-		//removes the card from the deck
-		shoeDeck.splice(shoeDeck.indexOf(randCard),1);
+		//checks to make sure there are cards in the shoe
+		shoeCheck();
+	    // pick a random index into the deck
+    	randCardNumber = Math.floor(Math.random() * shoeDeck.length);
+    	// store the value of that card
+   		var randCard = shoeDeck[randCardNumber];
+    	// remove the one random card from the shoe
+   		shoeDeck.splice(randCardNumber,1);
 
-		if(dealPlayer1 == true)
+   		//variables for who's turn it is to get a card
+   		var dealPlayer1;
+   		var dealPlayer2;
+   		var dealDealer;
+   		//player 1's turn for a card
+		if(dealPlayer1)
 		{
 			//adds the random card to the players hand
 			player1Hand.push(randCard);
-			//else it is the dealers turn
 			dealPlayer1 = false;
 
+			//if there is only one player the next card goes to the dealer
 			if(amountOfPlayers == 1)
 			{
 				dealDealer = true;
 			}
 
+			//if there is 2 players then player 2 gets a card next
 			else if(amountOfPlayers == 2)
 			{
 				dealPlayer2 = true;
 			}
 		}
 
-		else if(dealPlayer2 == true)
+		//player 2's turn for a card
+		else if(dealPlayer2)
 		{
 			player2Hand.push(randCard);
 			dealDealer = true;
 			dealPlayer2 = false;
 		}
 
-		else if (dealDealer == true)
+		//player 3's turn for a card
+		else if (dealDealer)
 		{
 			//adds the random card to the dealers hand
 			dealerHand.push(randCard);
@@ -148,229 +149,139 @@ function InitialDeal()
 			dealPlayer1 = true
 			dealDealer = false;
 		}
+    // actually since there is no 'else' clause, you don't even need to use 'else if' above
 	}
-
 
 	newDeckLength = shoeDeck.length;
-	//prints card that was
-	//console.log(randCard);
 
-	PrintInitialDeal();
+	//PrintinitialDeal();
+	numberCheck();
 }
 
-function PrintInitialDeal()
+//turns cards into a numerical value and adds them together based on the first character in the string within each array position
+function cardAmountCheck(currentCards)
 {
-	console.log("Player 1 Hand: ")
-	console.log(player1Hand);
+  if (DEBUG) {console.log('PlayerCardCheck()');};
 
-	if(amountOfPlayers == 2)
-	{
-		console.log("Player 2 Hand: ");
-		console.log(player2Hand);
-	}	
-
-	console.log("Dealer's Hand: ")
-	console.log(dealerHand);
-	console.log("");
-
-	Player1CardCheck(player1Hand);
-}
-
-//turns cards into a numerical value and adds them together
-function Player1CardCheck(currentCards)
-{
-	player1CardTotal = 0;
+  var cardAmount = 0;
 
 	for(var l = 0; l < currentCards.length; l++)
 	{
 		if(currentCards[l].charAt(0) == 'A')
 		{
-			if(player1CardTotal < 11)
-				player1CardTotal += 11;
+			//if the player has a hand that equals less than 11 the ACE is used as an 11
+			//if the player has over 11 they would bust with an 11 so it turns the ACE into a 1 value
+			if(cardAmount < 11)
+				cardAmount += 11;
 
 			else
-				player1CardTotal += 1;
+				cardAmount += 1;
 		}
 
 		if(currentCards[l].charAt(0) == '2')
 		{
-			player1CardTotal = player1CardTotal + 2;
+			cardAmount = cardAmount + 2;
 		}
 
 		if(currentCards[l].charAt(0) == '3')
 		{
-			player1CardTotal = player1CardTotal + 3;
+			cardAmount = cardAmount + 3;
 		}
 
 		if(currentCards[l].charAt(0) == '4')
 		{
-			player1CardTotal = player1CardTotal + 4;
+			cardAmount = cardAmount + 4;
 		}
 
 		if(currentCards[l].charAt(0) == '5')
 		{
-			player1CardTotal = player1CardTotal + 5;
+			cardAmount = cardAmount + 5;
 		}
 
 		if(currentCards[l].charAt(0) == '6')
 		{
-			player1CardTotal = player1CardTotal + 6;
+			cardAmount = cardAmount + 6;
 		}
 
 		if(currentCards[l].charAt(0) == '7')
 		{
-			player1CardTotal = player1CardTotal + 7;
+			cardAmount = cardAmount + 7;
 		}
 
 		if(currentCards[l].charAt(0) == '8')
 		{
-			player1CardTotal = player1CardTotal + 8;
+			cardAmount = cardAmount + 8;
 		}
 
 		if(currentCards[l].charAt(0) == '9')
 		{
-			player1CardTotal = player1CardTotal + 9;
+			cardAmount = cardAmount + 9;
 		}
 
 		if(currentCards[l].charAt(0) == '1')
 		{
-			player1CardTotal = player1CardTotal + 10;
+			cardAmount = cardAmount + 10;
 		}
 
 		if(currentCards[l].charAt(0) == 'J')
 		{
-			player1CardTotal = player1CardTotal + 10;
+			cardAmount = cardAmount + 10;
 		}
 
 		if(currentCards[l].charAt(0) == 'Q')
 		{
-			player1CardTotal = player1CardTotal + 10;
+			cardAmount = cardAmount + 10;
 		}
 
 		if(currentCards[l].charAt(0) == 'K')
 		{
-			player1CardTotal = player1CardTotal + 10;
+			cardAmount = cardAmount + 10;
 		}
 	}
 
-	console.log("Player 1 Card Total:")
-	console.log(player1CardTotal);
-	console.log("");
-	NumberCheck();
+	return(cardAmount);
 }
 
-function Player2CardCheck(currentCards)
+function numberCheck()
 {
-	player2CardTotal = 0;
+  if (DEBUG) {console.log('numberCheck()');};
 
-	for(var l = 0; l < currentCards.length; l++)
-	{
-		if(currentCards[l].charAt(0) == 'A')
-		{
-			if(player2CardTotal < 11)
-			{
-				player2CardTotal += 11;
-			}
-
-			else
-			{
-				player2CardTotal += 1;
-			}
-		}
-
-		if(currentCards[l].charAt(0) == '2')
-		{
-			player2CardTotal = player2CardTotal + 2;
-		}
-
-		if(currentCards[l].charAt(0) == '3')
-		{
-			player2CardTotal = player2CardTotal + 3;
-		}
-
-		if(currentCards[l].charAt(0) == '4')
-		{
-			player2CardTotal = player2CardTotal + 4;
-		}
-
-		if(currentCards[l].charAt(0) == '5')
-		{
-			player2CardTotal = player2CardTotal + 5;
-		}
-
-		if(currentCards[l].charAt(0) == '6')
-		{
-			player2CardTotal = player2CardTotal + 6;
-		}
-
-		if(currentCards[l].charAt(0) == '7')
-		{
-			player2CardTotal = player2CardTotal + 7;
-		}
-
-		if(currentCards[l].charAt(0) == '8')
-		{
-			player2CardTotal = player2CardTotal + 8;
-		}
-
-		if(currentCards[l].charAt(0) == '9')
-		{
-			player2CardTotal = player2CardTotal + 9;
-		}
-
-		if(currentCards[l].charAt(0) == '1')
-		{
-			player2CardTotal = player2CardTotal + 10;
-		}
-
-		if(currentCards[l].charAt(0) == 'J')
-		{
-			player2CardTotal = player2CardTotal + 10;
-		}
-
-		if(currentCards[l].charAt(0) == 'Q')
-		{
-			player2CardTotal = player2CardTotal + 10;
-		}
-
-		if(currentCards[l].charAt(0) == 'K')
-		{
-			player2CardTotal = player2CardTotal + 10;
-		}
-	}
-
-	console.log("Player 2 Card Total:")
-	console.log(player2CardTotal);
-	console.log("");
-	Player2NumberCheck();
-}
-
-function NumberCheck()
-{
 	//PLAYER 1 STAY
 	if(player1CardTotal >= 17 && player1CardTotal < 21)
 	{
 		if(amountOfPlayers == 2)
-			Player2CardCheck(player2Hand);
+		{
+			player2CardTotal = cardAmountCheck(player2Hand);
+			player2NumberCheck();
+		}
 
 		else if(amountOfPlayers == 1)
-			DealerCardCheck(dealerHand);
+		{
+			dealerCardTotal = cardAmountCheck(dealerHand);
+			dealerNumberCheck();
+		}
 	}
 
 	//PLAYER 1 BLACKJACK
 	else if(player1CardTotal == 21)
 	{
 		if(amountOfPlayers == 2)
-			Player2CardCheck(player2Hand);
+		{
+			player2CardTotal = cardAmountCheck(player2Hand);
+			player2NumberCheck();
+		}
 
 		else if(amountOfPlayers == 1)
-			DealerCardCheck(dealerHand);
+		{
+			dealerCardTotal = cardAmountCheck(dealerHand);
+			Dealer();
+		}
 	}
 
 	//PLAYER 1 HIT
 	else if (player1CardTotal <= 16)
 	{
-		HitPlayer1Again();
+		hitPlayer1Again();
 	}
 
 	//PLAYER 1 BUST
@@ -379,35 +290,49 @@ function NumberCheck()
 		player1Bust = true;
 
 		if(amountOfPlayers == 2)
-			Player2CardCheck(player2Hand);
+		{
+			player2CardTotal = cardAmountCheck(player2Hand);
+			player2NumberCheck();
+		}
 
 		else if(amountOfPlayers == 1)
-			DealerCardCheck(dealerHand);
+		{
+			dealerCardTotal = cardAmountCheck(dealerHand);
+			dealerNumberCheck();
+		}
 	}
 }
 
-function Player2NumberCheck()
+function player2NumberCheck()
 {
 	if(player2CardTotal >= 17 && player2CardTotal < 21)
-		DealerCardCheck(dealerHand);
+	{
+		dealerCardTotal = cardAmountCheck(dealerHand);
+		dealerNumberCheck();
+	}
 
 	else if(player2CardTotal == 21)
-		DealerCardCheck(dealerHand);
+	{
+		dealerCardTotal = cardAmountCheck(dealerHand);
+		dealerNumberCheck();
+	}
 
 	else if(player2CardTotal <= 16)
-		HitPlayer2Again();
+		hitPlayer2Again();
 
 	else if(player2CardTotal >= 22)
 	{
 		player2Bust = true;
-		DealerCardCheck(dealerHand);
+		dealerCardTotal = cardAmountCheck(dealerHand);
+		dealerNumberCheck();
 	}
 		
 }
 
-function HitPlayer1Again()
+function hitPlayer1Again()
 {
-	ShoeCheck();
+  if (DEBUG) {console.log('HitAgain()');};
+	shoeCheck();
 
 	randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
 	shoeDeck.splice(shoeDeck.indexOf(randCard),1);
@@ -416,12 +341,13 @@ function HitPlayer1Again()
 	console.log("Player 1 Hand: ")
 	console.log(player1Hand);
 
-	Player1CardCheck(player1Hand);
+	player1CardTotal = cardAmountCheck(player1Hand);
+	numberCheck();
 }
 
-function HitPlayer2Again()
+function hitPlayer2Again()
 {
-	ShoeCheck();
+	shoeCheck();
 
 	randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
 	shoeDeck.splice(shoeDeck.indexOf(randCard),1);
@@ -430,130 +356,43 @@ function HitPlayer2Again()
 	console.log("Player 2 Hand: ")
 	console.log(player2Hand);
 
-	Player1CardCheck(player1Hand);
+	player2CardTotal = cardAmountCheck(player2Hand);
+	player2NumberCheck();
 }
 
-function LogicCheck()
+function dealerNumberCheck()
 {
-
-}
-
-function DealerCardCheck(dealerCards)
-{
-	dealerCardTotal = 0;
-
-	for(var m = 0; m < dealerCards.length; m++)
-	{
-		if(dealerCards[m].charAt(0) == 'A')
-		{
-			if(dealerCardTotal < 11)
-			{
-				dealerCardTotal += 11;
-			}
-
-			else
-			{
-				dealerCardTotal += 1;
-			}		
-		}
-
-		if(dealerCards[m].charAt(0) == '2')
-		{
-			dealerCardTotal = dealerCardTotal + 2;
-		}
-
-		if(dealerCards[m].charAt(0) == '3')
-		{
-			dealerCardTotal = dealerCardTotal + 3;
-		}
-
-		if(dealerCards[m].charAt(0) == '4')
-		{
-			dealerCardTotal = dealerCardTotal + 4;
-		}
-
-		if(dealerCards[m].charAt(0) == '5')
-		{
-			dealerCardTotal = dealerCardTotal + 5;
-		}
-
-		if(dealerCards[m].charAt(0) == '6')
-		{
-			dealerCardTotal = dealerCardTotal + 6;
-		}
-
-		if(dealerCards[m].charAt(0) == '7')
-		{
-			dealerCardTotal = dealerCardTotal + 7;
-		}
-
-		if(dealerCards[m].charAt(0) == '8')
-		{
-			dealerCardTotal = dealerCardTotal + 8;
-		}
-
-		if(dealerCards[m].charAt(0) == '9')
-		{
-			dealerCardTotal = dealerCardTotal + 9;
-		}
-
-		if(dealerCards[m].charAt(0) == '1')
-		{
-			dealerCardTotal = dealerCardTotal + 10;
-		}
-
-		if(dealerCards[m].charAt(0) == 'J')
-		{
-			dealerCardTotal = dealerCardTotal + 10;
-		}
-
-		if(dealerCards[m].charAt(0) == 'Q')
-		{
-			dealerCardTotal = dealerCardTotal + 10;
-		}
-
-		if(dealerCards[m].charAt(0) == 'K')
-		{
-			dealerCardTotal = dealerCardTotal + 10;
-		}
-	}
-
-	console.log("DealerCardTotal:")
-	console.log(dealerCardTotal);
-	DealerNumberCheck();
-}
-
-function DealerNumberCheck()
-{
+  if (DEBUG) {console.log('dealerNumberCheck()');};
 	//STAY
 	if(dealerCardTotal >= 17 && dealerCardTotal < 21)
 	{
-		WinOrLose();
+		winOrLose();
 	}
 
 	//BLACKJACK
 	else if(dealerCardTotal == 21)
 	{
-		WinOrLose();
+		winOrLose();
 	}
 
 	//HIT
 	else if (dealerCardTotal <= 16)
 	{
-		DealerHitAgain();
+		dealerHitAgain();
 	}
 
 	//BUST
 	else if(dealerCardTotal >= 22)
 	{
 		dealerBust = true;
-		WinOrLose();
+		winOrLose();
 	}
 }
 
-function DealerHitAgain()
+function dealerHitAgain()
 {
-	ShoeCheck();
+  if (DEBUG) {console.log('dealerHitAgain()');};
+	shoeCheck();
 
 	randCard = shoeDeck[Math.floor(Math.random() * shoeDeck.length)];
 	shoeDeck.splice(shoeDeck.indexOf(randCard),1);
@@ -562,11 +401,13 @@ function DealerHitAgain()
 	console.log("Dealers's Hand: ")
 	console.log(dealerHand);
 
-	DealerCardCheck(dealerHand);
+	dealerCardTotal = cardAmountCheck(dealerHand);
+	dealerNumberCheck();
 }
 
-function WinOrLose()
+function winOrLose()
 {
+  if (DEBUG) {console.log('winOrLose()');};
 	newDeckLength = shoeDeck.length;
 
 	if(player1Bust == true)
@@ -631,6 +472,12 @@ function WinOrLose()
 
 	dealCounter ++;
 
+ 	console.log("");
+	console.log("Player 1 has: " + player1CardTotal)
+	console.log("Player 2 has: " + player2CardTotal)
+	console.log("Dealer has: " + dealerCardTotal)
+
+
 	console.log("");
 	console.log("Cards in shoe: ");
 	console.log(shoeDeck.length);
@@ -638,6 +485,9 @@ function WinOrLose()
 	console.log("Hands Dealt:");
 	console.log(dealCounter);
 	console.log("");
+	console.log("Deals left: ");
+	console.log(amountOfDeals - dealCounter);
+
 
 	player1Hand = [];
 	player2Hand = [];
@@ -651,30 +501,36 @@ function WinOrLose()
 	dealerBust = false;
 
 	if(dealCounter < amountOfDeals)
-	{	
-		InitialDeal();
+	{
+		initialDeal();
 	}
+
 
 	else if(dealCounter == amountOfDeals)
 	{
-		FinalOutput();
+		finalOutput();
 	}
 }
 
-function ShoeCheck()
+// comments needed
+function shoeCheck()
 {
+  if (DEBUG) {console.log('shoeCheck()');};
+  		//console.log(shoeDeck.length);
+  		//console.log(shoeDeck);
+
 	if(shoeDeck.length == 0)
 	{
-		fullDeck = [];
-		shoeDeck = [];
-		Deck();
+		//shoeDeck = [];
+		addDecksToShoe();
 	}
 
 	else
 		return;
 }
 
-function FinalOutput()
+//output for total wins/losses/pushes for two players
+function finalOutput()
 {
 	console.log("Player 1 - Wins: " + player1TotalWins + "  Losses: " + player1TotalLosses + "  Pushes: " + player1TotalPushes);
 
@@ -682,4 +538,8 @@ function FinalOutput()
 	{
 		console.log("Player 2 - Wins: " + player2TotalWins + "  Losses: " + player2TotalLosses + "  Pushes: " + player2TotalPushes);
 	}
+
+	// this stops the node process and returns to the Terminal
+	process.exit(code=0);
 }
+
