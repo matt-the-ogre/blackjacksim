@@ -40,7 +40,7 @@ var playerAce = false;
 var dealCounter = 0;
 
 //used to change the amount of deals before the program stops
-var amountOfDeals = 1;
+var amountOfDeals = 700;
 
 var numberOfAces = 0;
 
@@ -64,11 +64,11 @@ function Deck()
 {
 
 	for(var i = 0; i < suit.length; i++)
-	{		
+	{
 		for(var j = 0; j < cards.length; j++)
 		{
 			fullDeck.push(cards[j] + suit[i]);
-		}	
+		}
 	}
 
 	Shoe();
@@ -167,7 +167,7 @@ function PrintInitialDeal()
 	{
 		console.log("Player 2 Hand: ");
 		console.log(player2Hand);
-	}	
+	}
 
 	console.log("Dealer's Hand: ")
 	console.log(dealerHand);
@@ -402,7 +402,7 @@ function Player2NumberCheck()
 		player2Bust = true;
 		DealerCardCheck(dealerHand);
 	}
-		
+
 }
 
 function HitPlayer1Again()
@@ -454,7 +454,7 @@ function DealerCardCheck(dealerCards)
 			else
 			{
 				dealerCardTotal += 1;
-			}		
+			}
 		}
 
 		if(dealerCards[m].charAt(0) == '2')
@@ -645,13 +645,13 @@ function WinOrLose()
 	player1CardTotal = 0;
 	player2CardTotal = 0;
 	dealerCardTotal = 0;
-	decksInShoeCheck = 1;	
+	decksInShoeCheck = 1;
 	player1Bust = false;
 	player2Bust = false;
 	dealerBust = false;
 
 	if(dealCounter < amountOfDeals)
-	{	
+	{
 		InitialDeal();
 	}
 
