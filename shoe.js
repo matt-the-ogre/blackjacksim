@@ -47,6 +47,7 @@ Shoe.prototype.dealOneCard = function(){
   if (!this.cards.length) {
     this.buildShoe(this.numDecks);
   }
+  if (DEBUG) console.log(randCard);
   return randCard;
 }
 

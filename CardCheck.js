@@ -40,7 +40,7 @@ var playerAce = false;
 var dealCounter = 0;
 
 //used to change the amount of deals before the program stops
-var amountOfDeals = 700;
+var amountOfDeals = 2000;
 
 var numberOfAces = 0;
 
@@ -71,11 +71,12 @@ function Deck()
 		}
 	}
 
-	Shoe();
+Shoe();
 
 	newDeckLength = shoeDeck.length;
 	//console.log(newDeckLength);
 }
+
 
 //adds multiple decks to the shoe
 function Shoe()
@@ -92,6 +93,8 @@ function Shoe()
 	}
 
 	decksInShoeCheck = 0;
+InitialDeal();
+
 
 	//outputs for cards in entire shoe
 	//console.log(shoeDeck);
@@ -99,8 +102,6 @@ function Shoe()
 
 //console.log(newDeckLength);
 //console.log(shoeDeck.length);
-
-InitialDeal();
 
 //deals the first hand for player(s) and dealer from the shoe
 function InitialDeal()
@@ -155,8 +156,9 @@ function InitialDeal()
 	//prints card that was
 	//console.log(randCard);
 
-	PrintInitialDeal();
 }
+
+PrintInitialDeal();
 
 function PrintInitialDeal()
 {

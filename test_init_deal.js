@@ -8,3 +8,12 @@ for (i = 0; i < 10; i++) {
   console.log(shoe.dealOneCard());
 }
 
+var Hand = require('./hand.js');
+var player1Hand = new Hand();
+
+for (i = 0; i < 10; i++) {
+  player1Hand.addCard(shoe.dealOneCard());
+  player1Hand.print();
+  console.log(player1Hand.getTotal());
+}
+
