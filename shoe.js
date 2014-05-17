@@ -1,6 +1,6 @@
 //---------
 // This file contains the Class definition for a Shoe, which is an collection of Decks all in one array
-var DEBUG = true;
+var DEBUG = false;
 
 //var Deck = require('./deck.js');
 var Card = require('./card.js');
