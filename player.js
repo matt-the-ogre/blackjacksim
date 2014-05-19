@@ -3,9 +3,10 @@ var Hand = require('./hand.js');
 
 module.exports = Player;
 
-function Player(playerType) {
+function Player(playerType, identity) {
   this.hand = new Hand();
   this.playerType = playerType;
+  this.identity = identity;
   this.nextMove = undefined;
 
   //if (DEBUG) console.log('player instantiated as ' + this.playerType);
@@ -20,53 +21,64 @@ Player.prototype.getTotal = function() {
 }
 
 Player.prototype.print = function() {
-  console.log('playerType = ' + this.playerType + ' nextMove = ' + this.nextMove);
+  console.log('['+ this.identity + ']: Total = ' + this.getTotal() + ' ' + this.playerType + ' => ' + this.nextMove);
   this.hand.print();
 }
 
 Player.prototype.getNextMove = function ()
 {
-	cardTotal = this.hand.getTotal()[0]; // TODO need to handle both values here
-  var nextMove = undefined;
+	var cardTotal = this.hand.getTotal(); // TODO need to handle both values here
+  var nextMove = [undefined,undefined];
 
-//   for (total in cardTotal) {
+//  for (total in cardTotal) {
+  for (index = 0; index < cardTotal.length; index++) {
     if (this.playerType == 'player') {
-
-      //PLAYER STAY
-      if(cardTotal >= 17 && cardTotal <= 21)
+      // check if they won
+      if (cardTotal[index] == 21) {
+        if (DEBUG) console.log('won');
+        nextMove[index] = 'won';
+      }
+      // check if they should stay
+      else if(cardTotal[index] >= 17 && cardTotal[index] < 21)
       {
         if (DEBUG) console.log('stay');
-        nextMove = 'stay';
+        nextMove[index] = 'stay';
       }
-
-      //PLAYER 1 HIT
       else
+      // otherwise hit
       {
-        console.assert(cardTotal <= 21, 'should never have a cardTotal > 21 in a players hand');
+        //console.assert(cardTotal[index] <= 21, 'should never have a cardTotal > 21 in a players hand');
         if (DEBUG) console.log('hit');
-        nextMove = 'hit';
+        nextMove[index] = 'hit';
       }
     } else {
       // dealer!
-      //STAY
-      if(cardTotal >= 17 && cardTotal <= 21)
+      // check if they won
+      if (cardTotal[index] == 21) {
+        if (DEBUG) console.log('won');
+        nextMove[index] = 'won';
+      }
+      // check if they should stay
+      else if(cardTotal[index] >= 17 && cardTotal[index] < 21)
       {
         if (DEBUG) console.log('stay');
-        nextMove = 'stay';
+        nextMove[index] = 'stay';
       }
-
-      //HIT
+      // otherwise hit
       else
       {
-        console.assert(cardTotal <= 21, 'should never have a cardTotal > 21 in a dealers hand');
+        //console.assert(cardTotal[index] <= 21, 'should never have a cardTotal > 21 in a dealers hand');
         if (DEBUG) console.log('hit');
-        nextMove = 'hit';
+        nextMove[index] = 'hit';
       }
 
     }
-//   }
+  }
 
-  this.nextMove = nextMove;
+  // we now have an array of two possible moves
+  if (nextMove[0] == 'won' || nextMove[1] == 'won') this.nextMove = 'won';
+  else if (nextMove[0] == 'stay' && nextMove[1] == 'stay') this.nextMove = 'stay';
+  else if (nextMove[0] == 'hit' || nextMove[1] == 'hit') this.nextMove = 'hit';
 
-  return nextMove;
+  return this.nextMove;
 }

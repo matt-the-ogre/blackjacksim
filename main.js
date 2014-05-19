@@ -1,4 +1,4 @@
-var DEBUG = true;
+var DEBUG = false;
 
 var Shoe = require('./shoe.js');
 var shoe = new Shoe(6);
@@ -16,19 +16,27 @@ Array.prototype.remove = function(from, to) {
 // }
 
 var Player = require('./player.js');
+var numGames = 1000000;
+var date = new Date();
+console.log(date);
+console.log('\nStarting a run of ' + numGames + ' games.\n');
+var statistics = {wins:[0,0,0,0], losses:[0,0,0,0]}; // TODO populate this properly according to numPlayers
 
-for (var gameNum = 0; gameNum < 100; gameNum++) {
+for (var gameNum = 0; gameNum < numGames; gameNum++) {
+// 	console.log(date);
+	if (DEBUG) console.log('Game: ' + gameNum);
+
+
   // initialize a blank player array
   var players = [];
   // set the starting number of players
   var numPlayers = 4; // including the dealer
 
   // initialize the 'players' array
-  // we're using "<=" for the total check because the dealer is the last player (i.e. numPlayers)
   for (player = 0; player < numPlayers; player++) {
 
     // make a new player
-    if (player != numPlayers) players.push(new Player('player', player));
+    if (player != numPlayers-1) players.push(new Player('player', player));
 
     // the last player created is a dealer
     else players.push(new Player('dealer', player));
@@ -39,8 +47,6 @@ for (var gameNum = 0; gameNum < 100; gameNum++) {
     for (player = 0; player < players.length; player++) {
       players[player].addCard(shoe.dealOneCard());
       players[player].getNextMove();
-  //     players[player].print();
-  //     console.log(players[player].getTotal());
     }
     // TODO check if they have 21 here!
   }
@@ -52,7 +58,6 @@ for (var gameNum = 0; gameNum < 100; gameNum++) {
   var dealerWon = false;
   var activePlayerNum = 0; // start with player 1
 
-  var statistics = {wins:[0,0,0,0], losses:[0,0,0,0]}; // TODO populate this properly according to numPlayers
 
   if (DEBUG) console.log('\ninitial deal is done, start playing the game');
 
@@ -80,7 +85,7 @@ for (var gameNum = 0; gameNum < 100; gameNum++) {
       if (players[activePlayerNum].playerType == 'dealer') {
         // dealer busts, game over
         if (DEBUG) console.log('Dealer bust!');
-        statistics.losses[-1]++;
+        statistics.losses[statistics.losses.length - 1]++;
         players.splice(activePlayerNum,1);
         numPlayers--;
         activePlayerNum--;
@@ -105,7 +110,7 @@ for (var gameNum = 0; gameNum < 100; gameNum++) {
         // dealer won, game over
         if (DEBUG) console.log('Dealer won!');
         dealerWon = true;
-        statistics.wins[-1]++;
+        statistics.wins[statistics.wins.length - 1]++;
         gameOver = true;
       } else {
         // player wins, take them out of the game
@@ -154,7 +159,7 @@ for (var gameNum = 0; gameNum < 100; gameNum++) {
         // pretty sure there's a case here where two non-dealers win with tied totals, and both need to win
 
         if (DEBUG) console.log('Winner is ' + winner[finalWinner].identity + ' with ' + winningTotal[finalWinner]);
-        statistics.wins[winner[finalWinner].identity-1]++;
+        statistics.wins[winner[finalWinner].identity]++;
 
       }
     }
@@ -162,10 +167,10 @@ for (var gameNum = 0; gameNum < 100; gameNum++) {
     // only one player left
     // TODO need better logic here
     if (numPlayers == 1) {
-      console.log('Winner is...');
+      if (DEBUG) console.log('Winner is...');
       for (player = 0; player < players.length; player++) {
-            statistics.wins[players[player].identity-1]++;
-            players[player].print();
+            statistics.wins[players[player].identity]++;
+            if (DEBUG) players[player].print();
       }
       gameOver = true;
     }
@@ -178,16 +183,17 @@ for (var gameNum = 0; gameNum < 100; gameNum++) {
   }
 
   if (DEBUG) console.log('\nGame Over.');
-  if (dealerWon) console.log('\ndealer won');
+  if (dealerWon) if (DEBUG) console.log('\ndealer won');
   else if (dealerBust) {
-    console.log('\ndealer bust, these players won...');
+    if (DEBUG) console.log('\ndealer bust, these players won...');
     if (DEBUG) console.log(players, players.length)
     for (player = 0; player < players.length; player++) {
-          statistics.wins[players[player].identity-1]++;
-          players[player].print();
+          statistics.wins[players[player].identity]++;
+          if (DEBUG) players[player].print();
     }
   }
 
 }
 
 console.log(statistics);
+console.log(date);

@@ -19,10 +19,10 @@ function Card(value, suit) {
   }
   this.value = value;
   this.suit = suit;
-  if (DEBUG) console.log('Card instantiated as ' + value + ' of ' + suit);
+  if (DEBUG) console.log('Card instantiated as ' + this.value + ' of ' + this.suit);
   return true;
 }
 
-Card.prototype.value = '';
-Card.prototype.suit = '';
-
+Card.prototype.print = function() {
+  console.log(this.value + this.suit);
+}
