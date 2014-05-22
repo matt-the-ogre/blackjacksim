@@ -7,10 +7,12 @@ var Card = require('./card.js');
 
 module.exports = Shoe;
 
-function Shoe(numDecks) {
+function Shoe(numDecks, isRandom) {
   this.cards = [];
   this.numDecks = numDecks;
-
+  if (isRandom == undefined) this.isRandom = true;
+  else this.isRandom = isRandom;
+  if (DEBUG) console.log('isRandom: ' + this.isRandom);
   this.buildShoe(numDecks);
 
   //if (DEBUG) console.log('Shoe instantiated as' + this.cards);
@@ -35,11 +37,17 @@ Shoe.prototype.buildShoe = function(numDecks) {
 }
 
 Shoe.prototype.dealOneCard = function(){
-	//picks a card at random from the deck
-  randomCardIndex = Math.floor(Math.random() * this.cards.length);
-  //if (DEBUG) console.log('randomCardIndex = ' + randomCardIndex);
+
+  if (this.isRandom) {
+    //picks a card at random from the shoe
+    randomCardIndex = Math.floor(Math.random() * this.cards.length);
+  } else {
+    // picks the first card from the shoe, for debugging
+    randomCardIndex = 0;
+  }
+  if (DEBUG) console.log('randomCardIndex = ' + randomCardIndex);
   randCard = this.cards[randomCardIndex];
-  //if (DEBUG) console.log('randCard = ' + randCard);
+  if (DEBUG) console.log('randCard = ' + randCard);
 	//removes the card from the deck
 	this.cards.splice(randomCardIndex,1);
 
