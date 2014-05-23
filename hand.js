@@ -4,6 +4,10 @@ var DEBUG = false;
 
 //var Deck = require('./deck.js');
 var Card = require('./card.js');
+var Color = require('./color.js');
+
+var color = new Color();
+
 
 module.exports = Hand;
 
@@ -45,7 +49,7 @@ Hand.prototype.getTotal = function() {
 Hand.prototype.print = function() {
   process.stdout.write("Hand = ");
   for (card = 0; card < this.cards.length; card++) {
-    process.stdout.write(this.cards[card].value + this.cards[card].suit + " ");
+    process.stdout.write(color.white + this.cards[card].value + this.cards[card].suit + ' ' + color.off);
   }
   console.log(' ');
 }

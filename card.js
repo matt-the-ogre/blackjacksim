@@ -5,6 +5,10 @@
 // value must be in the set ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
 // suit must be one of ['S','H','D','C'] which represents Spades, Hearts, Diamonds and Clubs
 var DEBUG = false;
+var Color = require('./color.js');
+
+var color = new Color();
+
 module.exports = Card;
 
 function Card(value, suit) {
@@ -24,5 +28,5 @@ function Card(value, suit) {
 }
 
 Card.prototype.print = function() {
-  console.log(this.value + this.suit);
+  console.log(color.yellow + this.value + this.suit + color.off);
 }
